@@ -1,0 +1,36 @@
+Load CSV file in Pig:
+====================
+
+USACrimeAnalysisData = LOAD '/user/acadgild/hadoop/USACrimeAnalysisProj/Crimes_2001_to_present.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',') AS (ID:int,CaseNumber:chararray,Date:chararray,Block:chararray,IUCR:int,PrimaryType:chararray,Description:chararray,LocationDescription:chararray,Arrest:chararray,Domestic:chararray,Beat:int,District:int,Ward:int,CommunityArea:int,FBICode:chararray,XCoordinate:int,YCoordinate:int,Year:int,UpdatedOn:chararray,Latitude:chararray,Longitude:chararray,Location:chararray);
+
+
+1. Pig program to calculate the number of cases investigated under each FBI code:
+================================================================================
+
+Data1 = GROUP USACrimeAnalysisData BY FBICode;
+Data2 = FOREACH Data1 GENERATE group,COUNT(USACrimeAnalysisData.CaseNumber);
+dump Data2;
+
+
+2. Pig program to calculate the number of cases investigated under FBI code 32:
+==============================================================================
+Data1 = GROUP USACrimeAnalysisData BY FBICode;
+Data2 = FOREACH Data1 GENERATE group,COUNT(USACrimeAnalysisData.CaseNumber);
+Data3 = FILTER Data2 BY group == '32';
+dump Data3;
+
+
+3. Pig program to calculate the number of arrests in theft district wise:
+========================================================================
+Data4 = FILTER USACrimeAnalysisData BY (PrimaryType == 'THEFT' AND Arrest == 'true');
+Data5 = GROUP Data4 BY District;
+Data6 = FOREACH Data5 GENERATE group,COUNT(Data4.PrimaryType);
+dump Data6;
+
+
+4. Pig program to calculate the number of arrests done between October 2014 and October 2015:
+============================================================================================
+Data7 = FILTER USACrimeAnalysisData BY (Date >= '01/10/2014 00:00:00 AM' AND Date <= '1/10/2015 23:59:59' AND Arrest == 'true');
+Data8 = GROUP Data7 ALL;
+Data9 = FOREACH Data8 GENERATE COUNT(Data7);
+dump Data9;
